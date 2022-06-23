@@ -427,7 +427,7 @@ PennController( "instructions1",
                 getCanvas("set-upcanvas")
                 .remove()
                 ,
-                newTimer("intro", 500)
+                newTimer("intro", 1500)
                 .start()
                 .wait()
                 ,              
