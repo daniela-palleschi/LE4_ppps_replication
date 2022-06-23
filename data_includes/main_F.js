@@ -13,8 +13,13 @@ PennController.ResetPrefix(null);
 //PennController.Sequence(subsequence(repeat(shuffle(randomize("critical"), randomize("filler")), 25) , "break"), "post-instructions", "post-ques", "post-task-intro", "post-task",  "send", "final");
 
 // FOR REAL PARTICIPANTS; check: # of trials, DebugOff, DELETE results file
-PennController.DebugOff()
-PennController.Sequence( "demographics", "instructions1", "practice", "instructions2", subsequence(repeat(shuffle(randomize("critical"), randomize("filler")), 25) , "break"), "post-instructions", "post-ques", "post-task-intro", "post-task",  "send", "final");
+//PennController.DebugOff()
+PennController.Sequence( "demographics", "instructions1", "practice", "instructions2",
+                         subsequence(repeat(shuffle(randomize("critical"), randomize("filler")), 25) , "break"), 
+                         "post-instructions", "post-ques", "post-task-intro", "post-practice", "post-task-start", "post-task",  "send", "final");
+//PennController.Sequence( "post-task-intro", "post-practice", "post-task-start", "post-task");
+
+
 
 
 
@@ -26,18 +31,18 @@ dashed = (sentence, remove) => {
     let cmds = [ newText(textName, blanks.join(' ')).print() 
     .settings.css("font-family","courier") 
     .settings.css("font-size", "20px")
-  //.settings.css("font-size", "2em")  
+    //.settings.css("font-size", "2em")  
     .settings.center() 
     .cssContainer({
     "width": "90vw"})
     ]; // COURIER as font
-    // We'll go through each word, and add two command blocks per word
-    for (let i = 0; i <= words.length; i++)
+// We'll go through each word, and add two command blocks per word
+for (let i = 0; i <= words.length; i++)
     cmds = cmds.concat([ newKey('dashed'+i+words[i], " ").log().wait() , // Wait for (and log) a press on Space
-    getText(textName).text(blanks.map((w,n)=>(n==i?words[n]:w)).join(' ')) ]); // Show word
-    if (remove)  // Remove the text after the last key.wait() is parameter specified
+                         getText(textName).text(blanks.map((w,n)=>(n==i?words[n]:w)).join(' ')) ]); // Show word
+if (remove)  // Remove the text after the last key.wait() is parameter specified
     cmds.push(getText(textName).remove());
-    return cmds;
+return cmds;
 };
 
 // create cumulative function
@@ -326,6 +331,8 @@ PennController("demographics",
     .log("mm", "demo")
     .log("match", "demo")
     .log("rating", "demo")
+    .log("post_fam_key", "demo")
+    .log("post_alive_key", "demo")
     .log("item" , "demo") 
     .log("name" , "demo")  
     .log("list", "demo")
@@ -375,7 +382,10 @@ PennController( "instructions1",
                 )
                 
                 ,
-                newText("intro", "<p><b>Thank you for taking part in our experiment!</b><p> The experiment consists of four parts: a short practice round, the experiment itself, and then two short post-experiment questionnaires. The whole process should take around 15 minutes.<p><p> Press the <b>spacebar</b> to continue to the instructions.<p><p>")
+                newText("intro", "<p><b>Thank you for taking part in our experiment!</b><p> "
+                        + "The experiment consists of four parts: a short practice round, the experiment itself, and then two short post-experiment questionnaires. "
+                        + "The whole process should take around 15 minutes.<p><p> "
+                        + "Press the <b>spacebar</b> to continue to the instructions.<p><p>")
                 .settings.css("font-size", "20px")
                 ,
                 newCanvas("introcanvas",900, 450)
@@ -392,7 +402,17 @@ PennController( "instructions1",
                 .start()
                 .wait()
                 ,                
-                newText("set-up", "<p>Because <b>this is an experiment</b>, we would appreciate if you could take the following steps to ensure concentration:<p><t>&nbsp;&nbsp;&nbsp;&nbsp;&bull; <b>turn off any music</b>/audio you may be listening to<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull; refrain from Googling or looking up information during the experiment<p><t>&nbsp;&nbsp;&nbsp;&nbsp;&bull; put your <b>phone on silent</b> and leave it face down or out of reach<p><t>&nbsp;&nbsp;&nbsp;&nbsp;&bull; attend to the experiment until it is over (there is a short break half way through)<p><t>&nbsp;&nbsp;&nbsp;&nbsp;&bull; in general behave as if you were in our laboratory!<p>These steps will help ensure the data we collect from you is high quality. Please <b>press the spacebar</b> if you agree to take these steps.")
+                newText("set-up", "<p>Because <b>this is an experiment</b>, we would appreciate if you could take the following steps to ensure concentration:"
+                        + "<p><t>&nbsp;&nbsp;&nbsp;&nbsp;&bull; "
+                        + "<b>turn off any music</b>/audio you may be listening to"
+                        + "<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull; refrain from Googling or looking up information during the experiment"
+                        + "<p><t>&nbsp;&nbsp;&nbsp;&nbsp;&bull; put your <b>phone on silent</b> and leave it face down or out of reach"
+                        + "<p><t>&nbsp;&nbsp;&nbsp;&nbsp;&bull; attend to the experiment until it is over (there is a short break half way through)"
+                        + "<p><t>&nbsp;&nbsp;&nbsp;&nbsp;&bull; in general behave as if you were in our laboratory!"
+                        + "<p>These steps will help ensure the data we collect from you is high quality. "
+                        + "<p>This window will <b>automatically enter full screen mode</b> before continuing. "
+                        + "<br>To confirm you have taken the steps listed above, please <b>press the spacebar</b>. "
+                        + "Full screen mode will then begin.")
                 .settings.css("font-size", "20px")
                 ,
                 newCanvas("set-upcanvas",900, 450)
@@ -402,6 +422,8 @@ PennController( "instructions1",
                 newKey("set-up"," ")
                 .wait()
                 ,     
+                fullscreen()
+                ,
                 getCanvas("set-upcanvas")
                 .remove()
                 ,
@@ -549,7 +571,7 @@ PennController( "instructions1",
                 .remove(getText("example3"))
                 .settings.add(70,300, getText("example4"))
                 .print()  
-                 ,                
+                ,                
                 newKey("ex4"," ")
                 .wait()
                 ,
@@ -571,15 +593,12 @@ PennController( "instructions1",
                         + " However, during the experiment the sentences will disappear before you can make a selection, so consider this when you reach the end of the sentences."
                         + "<p>Once you've made your decision, you will continue to the next cultural figure."
                         + "<br> You only have a few seconds to make this selection, otherwise it will time out."
-                        + "<p>You’ll now start a practice round with instructions in red to help you. When you’re ready to start, press the <b>spacebar</b>. <p>")
+                        + "<p>You’ll now start a practice round with instructions in red to help you. When you’re ready to start, click the <b>spacebar</b> to begin. <p>")
                 .settings.css("font-size", "20px")
                 ,
                 getCanvas("instruccanvas")
                 .settings.add(0,0, getText("instructions_c"))
                 .print()  
-                , 
-                newKey("instr_a", " ")
-                .wait()
                 ,
                 newKey("prac_start"," ")
                 .wait()
@@ -595,6 +614,8 @@ PennController( "instructions1",
     .log("mm", "instr")  
     .log("match", "instr")
     .log("rating", "instr")
+    .log("post_fam_key", "instr")
+    .log("post_alive_key", "instr")
     .log("item" , "instr") 
     .log("name" , "instr")  
     .log("list", "instr")
@@ -617,15 +638,12 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                           defaultText
                                           .settings.css("font-family","courier")
                                           ,
-                                          // set 'yes' and 'no' keys; can be put in 'Welcome' screen and deleted
-                                          /*newVar("yes_key")
-                                          .settings.global()
-                                          .set( "F" )
+                                          newImage("checkmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/checkmark.jpeg")
+                                          .size(30,30)
                                           ,
-                                          newVar("no_key")
-                                          .settings.global()
-                                          .set( "J" )
-                                          , */
+                                          newImage("crossmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/crossmark.png")
+                                          .size(30,30)
+                                          ,
                                           // set trial's correct response; must remain here
                                           newVar("match")
                                           .set(variable.match)
@@ -689,31 +707,15 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .settings.css("font-family","times new roman")
                                       .settings.color("red")
                                       .print("center at 50%","30vh")
-                                      // judgement task
-                                      , 
-                                      newText("F_text", "F")
-                                      .settings.css("font-size", "20px")
-                                      .print("40vw","40vh")
-                                      //.settings.color("green")
                                       ,
-                                      newText("yes_text", "<i>(yes)")
-                                      .settings.css("font-size", "20px")
-                                      .print("38vw","45vh") // F-version
-                                      //.print("58vw","45vh") // J-version
-                                      .settings.color("green")
+                                      // print check and cross
+                                      getImage("checkmark") // F-version
+                                      //getImage("crossmark") // J-version
+                                      .print("30vw","45vh")
                                       ,
-                                      newText("J_text", "J")
-                                      .settings.css("font-size", "20px")
-                                      .settings.center()
-                                      .print("60vw","40vh")
-                                      //.settings.color("red")
-                                      ,
-                                      newText("no_text", "<i>(no)")
-                                      .settings.css("font-size", "20px")
-                                      .settings.center()
-                                      .print("58vw","45vh") // F-version
-                                      //.print("38vw","45vh") // J-version
-                                      .settings.color("red")
+                                      getImage("crossmark") // F-version
+                                      //getImage("checkmark") // J-version
+                                      .print("70vw","45vh")
                                       ,
                                       newKey("rating", "FJ")
                                       .callback( getTimer("time_out1").stop() )
@@ -728,16 +730,10 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       getText("rating_instru")
                                       .remove()
                                       , 
-                                      getText("F_text")
-                                      .remove()
-                                      ,   
-                                      getText("J_text")
-                                      .remove()
-                                      , 
-                                      getText("no_text")
+                                      getImage("crossmark")
                                       .remove()
                                       ,
-                                      getText("yes_text")
+                                      getImage("checkmark")
                                       .remove()
                                       ,                                 
                                       getKey("rating")
@@ -746,7 +742,7 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       // create variable for rating response
                                       newVar("rating")
                                       .set(getKey("rating") )
-                                     ,
+                                      ,
                                       // check if timedout
                                       getKey("rating")
                                       .test.pressed()
@@ -840,6 +836,8 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .log("mm", variable.mm)
                                       .log("match", variable.match)
                                       .log("rating", getVar("rating"))
+                                      .log("post_fam_key", "practice")
+                                      .log("post_alive_key", "practice")
                                       .log("item" , variable.item_id) 
                                       .log("name" , variable.name)  
                                       .log("list", variable.list)
@@ -903,6 +901,8 @@ PennController( "instructions2" ,
     .log("mm", "instr2")
     .log("match", "instr2")
     .log("rating", "instr2")
+    .log("post_fam_key", "instr2")
+    .log("post_alive_key", "instr2")
     .log("item" , "instr2") 
     .log("name" , "instr2")  
     .log("list", "instr2")
@@ -924,7 +924,13 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                           defaultText
                                           .settings.css("font-family","courier")
                                           ,
-                                          
+                                          // add check and cross
+                                          newImage("checkmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/checkmark.jpeg")
+                                          .size(30,30)
+                                          ,
+                                          newImage("crossmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/crossmark.png")
+                                          .size(30,30)
+                                          ,
                                           // dots
                                           newText("dots", "...")
                                           .print("20vw","40vh")
@@ -957,30 +963,15 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       ,  
                                       getText("bio") 
                                       .remove() 
-                                      ,     
-                                      newText("F_text", "F")
-                                      .settings.css("font-size", "20px")
-                                      .print("40vw","40vh")
-                                      //.settings.color("green")
                                       ,
-                                      newText("yes_text", "<i>(yes)")
-                                      .settings.css("font-size", "20px")
-                                      .print("38vw","45vh") // F-version
-                                      //.print("58vw","45vh") // J-version
-                                      .settings.color("green")
+                                      // print check and cross
+                                      getImage("checkmark") // F-version
+                                      //getImage("crossmark") // J-version
+                                      .print("30vw","45vh")
                                       ,
-                                      newText("J_text", "J")
-                                      .settings.css("font-size", "20px")
-                                      .settings.center()
-                                      .print("60vw","40vh")
-                                      //.settings.color("red")
-                                      ,
-                                      newText("no_text", "<i>(no)")
-                                      .settings.css("font-size", "20px")
-                                      .settings.center()
-                                      .print("58vw","45vh") // F-version
-                                      //.print("38vw","45vh") // J-version
-                                      .settings.color("red")
+                                      getImage("crossmark") // F-version
+                                      //getImage("checkmark") // J-version
+                                      .print("70vw","45vh")
                                       ,
                                       newKey("rating", "FJ")
                                       .callback( getTimer("time_out1").stop() )
@@ -991,10 +982,10 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .log()
                                       .wait()
                                       ,     
-                                      getText("F_text")
+                                      getImage("checkmark")
                                       .remove()
                                       ,   
-                                      getText("J_text")
+                                      getImage("crossmark")
                                       .remove()
                                       ,                                  
                                       getKey("rating")
@@ -1015,6 +1006,8 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .log("mm", variable.mm)
                                       .log("match", variable.match)
                                       .log("rating", getVar("rating"))
+                                      .log("post_fam_key", "critical")
+                                      .log("post_alive_key", "critical")
                                       .log("item" , variable.item_id) 
                                       .log("name" , variable.name)  
                                       .log("list", variable.list)
@@ -1037,7 +1030,14 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                           defaultText
                                           .settings.css("font-family","courier")
                                           ,
-                                                                                    // dots
+                                          // add check and cross
+                                          newImage("checkmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/checkmark.jpeg")
+                                          .size(30,30)
+                                          ,
+                                          newImage("crossmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/crossmark.png")
+                                          .size(30,30)
+                                          ,
+                                          // dots
                                           newText("dots", "...")
                                           .print("20vw","40vh")
                                           ,
@@ -1063,30 +1063,15 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       getText("bio") 
                                       .remove()   
                                       ,
-                                      newText("F_text", "F")
-                                      .settings.css("font-size", "20px")
-                                      .print("40vw","40vh")
-                                      //.settings.color("green")
+                                      // print check and cross
+                                      getImage("checkmark") // F-version
+                                      //getImage("crossmark") // J-version
+                                      .print("30vw","45vh")
                                       ,
-                                      newText("yes_text", "<i>(yes)")
-                                      .settings.css("font-size", "20px")
-                                      .print("38vw","45vh") // F-version
-                                      //.print("58vw","45vh") // J-version
-                                      .settings.color("green")
-                                      ,
-                                      newText("J_text", "J")
-                                      .settings.css("font-size", "20px")
-                                      .settings.center()
-                                      .print("60vw","40vh")
-                                      //.settings.color("red")
-                                      ,
-                                      newText("no_text", "<i>(no)")
-                                      .settings.css("font-size", "20px")
-                                      .settings.center()
-                                      .print("58vw","45vh") // F-version
-                                      //.print("38vw","45vh") // J-version
-                                      .settings.color("red")
-                                      ,     
+                                      getImage("crossmark") // F-version
+                                      //getImage("checkmark") // J-version
+                                      .print("70vw","45vh")
+                                      , 
                                       newKey("rating", "FJ")
                                       .callback( getTimer("time_out1").stop() )
                                       .log("all")  
@@ -1096,10 +1081,10 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .log()
                                       .wait()
                                       ,     
-                                      getText("F_text")
+                                      getImage("checkmark")
                                       .remove()
                                       ,   
-                                      getText("J_text")
+                                      getImage("crossmark")
                                       .remove()
                                       ,                                  
                                       getKey("rating")
@@ -1120,6 +1105,8 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .log("mm", variable.mm)
                                       .log("match", variable.match)
                                       .log("rating", getVar("rating"))
+                                      .log("post_fam_key", "filler")
+                                      .log("post_alive_key", "filler")
                                       .log("item" , variable.item_id) 
                                       .log("name" , variable.name)  
                                       .log("list", variable.list)
@@ -1185,6 +1172,8 @@ PennController( "break" ,
     .log("mm", "break")
     .log("match", "break")
     .log("rating", "break")
+    .log("post_fam_key", "break")
+    .log("post_alive_key", "break")
     .log("item" , "break") 
     .log("name" , "break")  
     .log("list", "break")
@@ -1220,6 +1209,8 @@ PennController( "post-instructions",
     .log("mm", "post-instr")
     .log("match", "post-instr")
     .log("rating", "post-instr")
+    .log("post_fam_key", "post-instr")
+    .log("post_alive_key", "post-instr")
     .log("item" , "post-instr") 
     .log("name" , "post-instr")  
     .log("list", "post-instr")
@@ -1342,6 +1333,8 @@ PennController("post-ques",
     .log("mm", "post-ques")
     .log("match", "post-ques")
     .log("rating", "post-ques")
+    .log("post_fam_key", "post-ques")
+    .log("post_alive_key", "post-ques")
     .log("item" , "post-ques") 
     .log("name" , "post-ques")  
     .log("list", "post-ques")
@@ -1354,23 +1347,25 @@ PennController("post-ques",
         );
 
 //====================================================================================================================================================================================================================
-// 7. Comprehension test explanation screen //
+// 7. Post-task explanation screen //
 
 PennController( "post-task-intro",
-                newText("comp1_1", "<p>Thank you for your feedback! We have a final task for you to complete before you are presented with your Prolific validation link.</b>")
+                newText("comp1_1", "<p>Thank you for your feedback! We have a final (short) task for you to complete before you are presented with your Prolific validation link.</b>")
                 .settings.css("font-size", "20px")
                 ,        
-                newText("comp1_2", "You will be presented with a list of names of cultural figures. Some of them were included in the experiment, some were not. <b>Please indicate whether you're familiar with each cultural figure</b>, regardless of whether or not the name appeared in the experiment. <p>After you have made your selections, you can retrieve your Prolific validation link by clicking 'Continue'.")
+                newText("comp1_2", "You will be presented with names of cultural figures, with the prompt <b><i>'familiar?'</i></b>. "
+                        + "Please indicate whether you were <b>familiar with the cultural figure <i>before this experiment</i></b>, by pressing the 'F' or 'J' key. "
+                        + "<p> You will then see the prompt <b><i>'alive today?'</i></b>. Please indicate whether you believe the cultural figure is currently alive or not."
+                        + "<br>If you are <b>unsure/don't know</b> whether somebody is living or dead, you can <b>wait</b> for the <i>'alive?'</i> prompt to time out</b>."
+                        + "<p> Each prompt will time out after a few seconds, so please answer quickly (if you have an answer)!"
+                        + "<p>Then, a new cultural figure will be presented with the same prompts. "
+                        + "<p><p>After you have responded to all the prompts, you will be presented your Prolific validation link."
+                        + "<p><p><b><i> Press the 'Continue' button to see some examples.")
                 .settings.css("font-size", "20px")
                 ,
-                newText("comp1_3", "<p><b>Please answer honestly!</p><p>")
-                .settings.center()
-                .settings.css("font-size", "20px")
-                ,
-                newCanvas("compCanv", 900, 300)
+                newCanvas("compCanv", 900, 450)
                 .settings.add(0,0, getText("comp1_1"))
                 .settings.add(0,100, getText("comp1_2")  )
-                .settings.add(355,225, getText("comp1_3")  )
                 .print()   
                 ,
                 newButton("compStart", "Continue to the final task")
@@ -1383,79 +1378,362 @@ PennController( "post-task-intro",
     .setOption("hideProgressBar", true);
 
 //====================================================================================================================================================================================================================
-// 8. Comprehension test proper // 26.05.2020 PM added and changed numbering
+// Post-practice
 
-var names = [];
-var test;
-function handleNames(row){
-    if (row.name=="void"){
-        names = names.sort(v=>1-2*(Math.random()>=0.5));
-        return newTrial("post-task",
+PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv")
+                         .filter("type" , "practice")
+                         ,
+                         variable => ["post-practice",
+                                      "PennController", PennController(
+                                          defaultText
+                                          .settings.css("font-family","courier")
+                                          ,
+                                          // add check and cross
+                                          newImage("checkmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/checkmark.jpeg")
+                                          .size(30,30)
+                                          ,
+                                          newImage("crossmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/crossmark.png")
+                                          .size(30,30)
+                                          ,
+                                          // dots
+                                          newText("dots", "...")
+                                          .print("center at 100vw","40vh")
+                                          ,
+                                          newTimer("dots", 1000)
+                                          .start()
+                                          .wait()
+                                          ,
+                                          getText("dots")
+                                          .remove()
+                                          ,
+                                          newText("name", variable.name)
+                                          //.print()
+                                          .settings.css("font-size", "30px")
+                                          .settings.css("font-family","courier")
+                                          .print("center at 50%","middle at 40%") 
+                                          ,
+                                          newText("familiar", "familiar?")
+                                          .settings.css("font-size", "20px")
+                                          .settings.css("font-family","courier")
+                                          .print("center at 50%","middle at 45%")
+                                          ,
+                                          newText("familiar-instru", "Were you familiar with this person/name<br><i>before the experiment?")
+                                          .settings.css("font-size", "15px")
+                                          .settings.css("font-family","times new roman")
+                                          .settings.center()
+                                          .settings.color("red")
+                                          .print("center at 50%","middle at 50%")
+                                          ,
+                                          // print check and cross
+                                          getImage("checkmark") // F-version
+                                          //getImage("crossmark") // J-version
+                                          .print("30vw","45vh")
+                                          ,
+                                          getImage("crossmark") // F-version
+                                          //getImage("checkmark") // J-version
+                                          .print("70vw","45vh")
+                                          ,
+                                          newKey("fam_resp", "FJ")
+                                          .callback( getTimer("time_out1").stop() )
+                                          .log("all")  
+                                          ,
+                                          newTimer("time_out1", 3000)
+                                          .start()
+                                          .log()
+                                          .wait()
+                                          ,
+                                          getKey("fam_resp")
+                                          .disable()
+                                          ,
+                                          newVar("fam_resp") // this will create a new variable "rating"
+                                          //.settings.global()
+                                          .set(getKey("fam_resp") )
+                                          ,
+                                          getText("familiar")
+                                          .remove()
+                                          ,
+                                          getText("familiar-instru")
+                                          .remove()
+                                          ,
+                                          getKey("fam_resp")
+                                          .test.pressed()
+                                          .success( )
+                                          .failure( newText("failure", "Try to be faster!")
+                                                    .settings.css("font-size", "15px")
+                                                    .settings.italic()
+                                                    .settings.bold()
+                                                    .settings.css("font-family","times new roman")
+                                                    .settings.center()
+                                                    .settings.color("red")
+                                                    .print("center at 50%","middle at 50%")
+                                                    ,
+                                                    newTimer("faster", 2000) .start()
+                                                    .log()
+                                                    .wait()
+                                                    ,
+                                                    getText("failure")
+                                                    .remove()
+                                                   )
+                                          ,
+                                          // ALIVE?
+                                          newText("alive", "alive today?")
+                                          .settings.css("font-size", "20px")
+                                          .settings.css("font-family","courier")
+                                          .print("center at 50%","middle at 45%")
+                                          ,
+                                          newText("alive-instru", "Do you believe they are alive today?")
+                                          .settings.css("font-size", "15px")
+                                          .settings.css("font-family","times new roman")
+                                          .settings.center()
+                                          .settings.color("red")
+                                          .print("center at 50%","middle at 50%")
+                                          ,
+                                          newKey("life_resp", "FJ")
+                                          .callback( getTimer("time_out2").stop() )
+                                          .log("all")  
+                                          ,
+                                          newTimer("time_out2", 3000)
+                                          .start()
+                                          .log()
+                                          .wait()
+                                          ,
+                                          getKey("life_resp")
+                                          .disable()
+                                          ,
+                                          getText("alive")
+                                          .remove()
+                                          ,
+                                          getText("alive-instru")
+                                          .remove()
+                                          ,
+                                          getKey("life_resp")
+                                          .test.pressed()
+                                          .success( )
+                                          .failure( newText("alive_failure", "Okay, you weren't sure. No problem.")
+                                                    .settings.css("font-size", "15px")
+                                                    .settings.italic()
+                                                    .settings.bold()
+                                                    .settings.css("font-family","times new roman")
+                                                    .settings.center()
+                                                    .settings.color("red")
+                                                    .print("center at 50%","middle at 50%")
+                                                    ,
+                                                    newTimer("faster", 2000) .start()
+                                                    .log()
+                                                    .wait()
+                                                    ,
+                                                    getText("alive_failure")
+                                                    .remove()
+                                                   )
+                                          ,
+                                          getImage("checkmark")
+                                          .remove()
+                                          ,   
+                                          getImage("crossmark")
+                                          .remove()
+                                          ,
+                                          getText("name")
+                                          .remove()
+                                          ,
+                                          newVar("life_resp") // this will create a new variable "rating"
+                                          //.settings.global()
+                                          .set(getKey("life_resp") )
+                                      )
+                                      .log("prolificID", getVar("proID"))
+                                      .log("age", getVar("IDage"))
+                                      .log("sex", getVar("IDsex"))
+                                      .log("L2", getVar("IDling"))
+                                      .log("whichL2", getVar("whichL2"))
+                                      .log("type", variable.type)
+                                      .log("lifetime" , variable.life_status)
+                                      .log("tense", variable.tense)
+                                      .log("mm", variable.mm)
+                                      .log("match", variable.match)
+                                      .log("rating", "posttaskpractice")
+                                      .log("post_fam_key", getVar("fam_resp"))
+                                      .log("post_alive_key", getVar("life_resp"))
+                                      .log("item" , variable.item_id)
+                                      .log("name" , variable.name)  
+                                      .log("list", variable.list)
+                                      .log( "withsquare", PennController.GetURLParameter("withsquare") )    
+                                      .log("bare_verb", variable.bare)  
+                                      .log( "yes_key" , getVar("yes_key"))
+                                      
+                                      
+                                     ]
+                        );
+
+//====================================================================================================================================================================================================================
+// 7. Post-task start screen //
+
+PennController( "post-task-start",
+                newText("comp1_1", "That was the practice round! You will now be presented with some more names. "
+                        + "<p> Remember, use the 'F' and 'J' keys to answer the prompts. "
+                        + "<p>If you are unsure whether somebody is living or dead, you can wait for the 'alive?' prompt to time out."
+                        + "<p><p><b><i>Press the spacebar to continue.")
+                .settings.css("font-size", "20px")
+                ,
+                newCanvas("compCanv", 900, 400)
+                .settings.add(0,0, getText("comp1_1"))
+                .print()   
+                ,
+                newKey("postStart", " ")
+                .wait()
+               )
+    
+    .setOption("countsForProgressBar", false)   //overrides some default settings, such as countsForProgressBar
+    .setOption("hideProgressBar", true);
+//====================================================================================================================================================================================================================
+// Post-task
+
+PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv")
+                         .filter("type" , "critical")
+                         ,
+                         variable => ["post-task",
+                                      "PennController", PennController(
+                                          defaultText
+                                          .settings.css("font-family","courier")
+                                          ,
+                                          // add check and cross
+                                          newImage("checkmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/checkmark.jpeg")
+                                          .size(30,30)
+                                          ,
+                                          newImage("crossmark", "https://amor.cms.hu-berlin.de/~pallesid/dfg_pretests/pictures/crossmark.png")
+                                          .size(30,30)
+                                          ,
+                                          // dots
+                                          newText("dots", "...")
+                                          .print("center at 100vw","40vh")
+                                          ,
+                                          newTimer("dots", 1000)
+                                          .start()
+                                          .wait()
+                                          ,
+                                          getText("dots")
+                                          .remove()
+                                          ,
+                                          newText("name", variable.name)
+                                          //.print()
+                                          .settings.css("font-size", "30px")
+                                          .settings.css("font-family","courier")
+                                          .print("center at 50%","middle at 40%")
+                                          ,
+                                          newText("familiar", "familiar?")
+                                          //.print()
+                                          .settings.css("font-size", "20px")
+                                          .settings.css("font-family","courier")
+                                          .print("center at 50%","middle at 45%")
+                                          ,
+                                          // print check and cross
+                                          getImage("checkmark") // F-version
+                                          //getImage("crossmark") // J-version
+                                          .print("30vw","45vh")
+                                          ,
+                                          getImage("crossmark") // F-version
+                                          //getImage("checkmark") // J-version
+                                          .print("70vw","45vh")
+                                          ,
+                                          newKey("fam_resp", "FJ")
+                                          .callback( getTimer("time_out1").stop() )
+                                          .log("all")  
+                                          ,
+                                          newTimer("time_out1", 3000)
+                                          .start()
+                                          .log()
+                                          .wait()
+                                          ,
+                                          getKey("fam_resp")
+                                          .disable()
+                                          ,
+                                          newVar("fam_resp") // this will create a new variable "rating"
+                                          //.settings.global()
+                                          .set(getKey("fam_resp") )
+                                          ,
+                                          getText("familiar")
+                                          .remove()
+                                          ,
+                                          // ALIVE?
+                                          newText("alive", "alive today?")
+                                          .settings.css("font-size", "20px")
+                                          .settings.css("font-family","courier")
+                                          .print("center at 50%","middle at 45%")
+                                          ,       
+                                          newKey("life_resp", "FJ")
+                                          .callback( getTimer("time_out2").stop() )
+                                          .log("all")  
+                                          ,
+                                          newTimer("time_out2", 3000)
+                                          .start()
+                                          .log()
+                                          .wait()
+                                          ,
+                                          getKey("life_resp")
+                                          .disable()
+                                          ,
+                                          getText("alive")
+                                          .remove()
+                                          ,
+                                          getImage("checkmark")
+                                          .remove()
+                                          ,   
+                                          getImage("crossmark")
+                                          .remove()
+                                          ,
+                                          getText("name")
+                                          .remove()
+                                          ,
+                                          newVar("life_resp") // this will create a new variable "rating"
+                                          //.settings.global()
+                                          .set(getKey("life_resp") )
+                                      )
+                                      .log("prolificID", getVar("proID"))
+                                      .log("age", getVar("IDage"))
+                                      .log("sex", getVar("IDsex"))
+                                      .log("L2", getVar("IDling"))
+                                      .log("whichL2", getVar("whichL2"))
+                                      .log("type", variable.type)
+                                      .log("lifetime" , variable.life_status)
+                                      .log("tense", variable.tense)
+                                      .log("mm", variable.mm)
+                                      .log("match", variable.match)
+                                      .log("rating", "posttask")
+                                      .log("post_fam_key", getVar("fam_resp"))
+                                      .log("post_alive_key", getVar("life_resp"))
+                                      .log("item" , variable.item_id)
+                                      .log("name" , variable.name)  
+                                      .log("list", variable.list)
+                                      .log( "withsquare", PennController.GetURLParameter("withsquare") )    
+                                      .log("bare_verb", variable.bare)  
+                                      .log( "yes_key" , getVar("yes_key"))
+                                      
+                                      
+                                     ]
+                        );
+
+// --------------------------------------------------------------------------------------------------------------
+// Send results
+
+PennController.SendResults( "send" ); // important!!! Sends all results to the server
+
+// --------------------------------------------------------------------------------------------------------------
+// Prolific/Thank you screen
+
+PennController.Template(PennController.GetTable( "validation.csv")// change this line for the appropriate experimental list
+                        ,
+                        variable => PennController( "final"
+                                                    ,
+                                                    newText("<p>Thank you for your participation!<br>You may now exit fullscreen mode by pressing the escape button (<i>'Esc'</i>)."
+                                                            + "<p>Here is your validation code: <b>"+variable.val_code+".</b>"
+                                                            + "<br><p>Enter this code <b>on the Prolific website immediately</b> in order to receive your payment.</p> If you wait too long, Prolific will mark your submission as 'timed out'."
+                                                            + " This will interfere with the processing of your payment.")
+                                                    .settings.css("font-size", "20px")
+                                                    .settings.center()
+                                                    .print()
+                                                    ,
+                                                    newButton("void")
+                                                    .wait()
+                                                   )
                         
-                        newText("instructions", "<p>Please indicate whether you're <b>familiar with the following cultural figures </b>('yes' or 'no'). <p>You must make a selection for each cultural figure before continuing.")
-                        //.settings.center()
-                        .settings.css("font-size", "20px")
-                        ,
-                        newCanvas("screen", 1500, 450)
-                        .add(350, 100, getText("instructions")) // leftmost ja/nein
-                        .add(285, 245, newText("yes / no")) // leftmost ja/nein
-                        .add(650 , 245, newText("yes / no")) // center ja/nein
-                        .add(990, 245, newText("yes / no")) // rightmost ja/nein
-                        // names
-                        .add(250, 170 , newCanvas("names-1", "60%", "100%") ) // leftmost column
-                        .add( 620, 170, newCanvas("names-2", "60%", "100%") ) // center column
-                        .add( 960, 170 , newCanvas("names-3", "60%", "100%") ) // rightmost column
-                        .print( "font-size", "20px")
-                        ,
-                        ...names.map( (r,i) => {
-                            test = test || newFunction(v=>true).test.is(true);
-                            test = test.and( getScale(r.name+'-scale-'+', life ='+r.life+'list ='+r.which_list).test.selected() );
-                            return newText(r.name)
-                            .before(
-                            newScale(r.name+'-scale-'+', life ='+r.life+'list ='+r.which_list, "yes", "no") //global_z.css is needed to hide the lables "yes" & "no"
-                            .log()
-                            .print()
-                            )
-                            .print( "2em" , parseInt(6+(i%17)*2)+"em" , getCanvas("names-"+parseInt(1+i/17)) );
-                        })
-                            ,                          
-                            newButton("continueb", "Continue")
-                            .print(640, 870)
-                            .wait(test)       //  would only proceed if all Scale elements are selected       
-                            )                           
-                            
-                        }
-                            names.push(row);
-                            return [];
-                        }
-                            Template( "post-task.csv", row => handleNames(row) );
-                            
-                            // --------------------------------------------------------------------------------------------------------------
-                            // 3. Send results
-                            
-                            PennController.SendResults( "send" ); // important!!! Sends all results to the server
-                            
-                            
-                            // --------------------------------------------------------------------------------------------------------------
-                            // 4. Thank you screen
-                            
-                            
-                            PennController.Template(PennController.GetTable( "validation.csv")// change this line for the appropriate experimental list
-                            ,
-                            variable => PennController( "final"
-                            ,
-                            newText("<p>Thank you for your participation!"
-                            + " Here is your validation code: <b>"+variable.val_code+".</b>"
-                            + "<br><p>Enter this code <b>on the Prolific website immediately</b> in order to receive your payment.</p> If you wait too long, Prolific will mark your submission as 'timed out'."
-                            + " This will interfere with the processing of your payment.")
-                            .settings.css("font-size", "20px")
-                            .settings.center()
-                            .print()
-                            ,
-                            newButton("void")
-                            .wait()
-                            )
-                            
-                            .setOption("countsForProgressBar", false)    //overrides some default settings, such as countsForProgressBar
-                            .setOption("hideProgressBar", true)
-                            );
+                        .setOption("countsForProgressBar", false)    //overrides some default settings, such as countsForProgressBar
+                        .setOption("hideProgressBar", true)
+                       );
