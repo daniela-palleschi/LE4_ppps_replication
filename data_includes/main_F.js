@@ -1,38 +1,32 @@
 PennController.ResetPrefix(null);
-//PennController.DebugOff() // use for the final version
+PennController.DebugOff() // use for the final version
 
 // --------------------------------------------------------------------------------------------------------------
 // Preamble
 
-// sequence
-// partial test run:
-//PennController.Sequence("final");
-//PennController.Sequence(subsequence(repeat(shuffle(randomize("critical")), 10) , "break"), "final");
-// full sequence test run (8 items):
-//PennController.Sequence( "demographics", "instructions1", "practice", "instructions2", subsequence(repeat(shuffle(randomize("critical"), randomize("filler")), 25) , "break"), "post-instructions", "post-ques", "post-task-intro", "post-task",  "send", "final");
-//PennController.Sequence(subsequence(repeat(shuffle(randomize("critical"), randomize("filler")), 25) , "break"), "post-instructions", "post-ques", "post-task-intro", "post-task",  "send", "final");
-
 // FOR REAL PARTICIPANTS; check: # of trials, DebugOff, DELETE results file
-//PennController.DebugOff()
 PennController.Sequence( "demographics", "instructions1", "practice", "instructions2",
-                         subsequence(repeat(shuffle(randomize("critical"), randomize("filler")), 25) , "break"), 
+                         subsequence(repeat(shuffle(randomize("critical"), randomize("filler")), 25) , "break"),
                          "post-instructions", "post-ques", "post-task-intro", "post-practice", "post-task-start", "post-task",  "send", "final");
-//PennController.Sequence( "post-task-intro", "post-practice", "post-task-start", "post-task");
+   
+//PennController.Sequence( "practice");
 
 
 
 
+// --------------------------------------------------------------------------------------------------------------
+// Create functions
 
 // create dashed function
 dashed = (sentence, remove) => {
     let words = sentence.split('*'),  blanks = words.map(w=>w.split('').map(c=>'_').join('') ); // 'sentence.spilot('*')' = '*' defines the chunk boundaries (in the .csv)
     let textName = 'dashed'+words.join('');
     // We'll return cmds: the first command consists in creating (and printing) a Text element with dashes
-    let cmds = [ newText(textName, blanks.join(' ')).print() 
-    .settings.css("font-family","courier") 
+    let cmds = [ newText(textName, blanks.join(' ')).print()
+    .settings.css("font-family","courier")
     .settings.css("font-size", "20px")
     //.settings.css("font-size", "2em")  
-    .settings.center() 
+    .settings.center()
     .cssContainer({
     "width": "90vw"})
     ]; // COURIER as font
@@ -64,7 +58,7 @@ cumulative_bio = (sentence, remove) => {
     cmds = cmds.concat([ newKey('context'+i+words[i], " ").log().wait() , // Wait for (and log) a press on Space
     getText(textName).text(blanks.map((w,n)=>(n<=i?words[n]:w)).join(' ')) ]); // Show word
     if (remove)  // Remove the text after the last key.wait() is parameter specified
-    cmds.push(getText(textName).remove()); 
+    cmds.push(getText(textName).remove());
     return cmds;
 };
 
@@ -79,7 +73,7 @@ cumulative = (sentence, remove) => {
     cmds = cmds.concat([ newKey('cumulative'+i+words[i], " ").log().wait() , // Wait for (and log) a press on Space
     getText(textName).text(blanks.map((w,n)=>(n<=i?words[n]:w)).join(' ')) ]); // Show word
     if (remove)  // Remove the text after the last key.wait() is parameter specified
-    cmds.push(getText(textName).remove()); 
+    cmds.push(getText(textName).remove());
     return cmds;
 };
 
@@ -94,7 +88,7 @@ cumulative_crit = (sentence, remove) => {
     cmds = cmds.concat([ newKey('critical'+i+words[i], " ").log().wait() , // Wait for (and log) a press on Space
     getText(textName).text(blanks.map((w,n)=>(n<=i?words[n]:w)).join(' ')) ]); // Show word
     if (remove)  // Remove the text after the last key.wait() is parameter specified
-    cmds.push(getText(textName).remove()); 
+    cmds.push(getText(textName).remove());
     return cmds;
 };
 
@@ -111,7 +105,7 @@ PennController("demographics",
                .print()
                ,
                newTextInput("proID", "")
-               .before(newText("proID", "Before we begin, please enter your Prolific ID: ") 
+               .before(newText("proID", "Before we begin, please enter your Prolific ID: ")
                        .settings.css("font-size", "20px"))
                .size(100, 20)
                .settings.center()
@@ -121,8 +115,8 @@ PennController("demographics",
                .print()
                ,
                newButton("start", "Continue")
-               .settings.center() 
-               .print() 
+               .settings.center()
+               .print()
                .wait(getTextInput("proID")
                      .test.text(/[^\s]+/)
                      .success()
@@ -324,7 +318,7 @@ PennController("demographics",
     .log("age", getVar("IDage"))
     .log("sex", getVar("IDsex"))
     .log("L2", getVar("IDling"))
-    .log("whichL2", getVar("whichL2")) 
+    .log("whichL2", getVar("whichL2"))
     .log("type", "demo")
     .log("lifetime" , "demo")
     .log("tense", "demo")
@@ -333,7 +327,7 @@ PennController("demographics",
     .log("rating", "demo")
     .log("post_fam_key", "demo")
     .log("post_alive_key", "demo")
-    .log("item" , "demo") 
+    .log("item" , "demo")
     .log("name" , "demo")  
     .log("list", "demo")
     .log( "withsquare", PennController.GetURLParameter("withsquare"))    
@@ -356,7 +350,7 @@ PennController( "instructions1",
                 .and( getVar("IDage")
                       .testNot.is("32 or older")   // AND if particpant is NOT over 32
                      )
-                .and(getVar("IDling") 
+                .and(getVar("IDling")
                      .testNot.is("no, I was (also) raised in:")    // AND participant is NOT bi-lingual
                     )
                 .success()   // continue as normal
@@ -365,19 +359,19 @@ PennController( "instructions1",
                     ,
                     newText("bye", "<p>You are ineligible for this study, as you have provided information which is inconsistent with your Prolific prescreening responses. "
                             + "<p>Please return your submission on Prolific by selecting the 'Stop without completing' button."
-                           ) 
+                           )
                     .settings.css("font-size", "20px")
-                    .settings.color("red") 
+                    .settings.color("red")
                     .settings.bold()
-                    .print() 
+                    .print()
                     ,
                     newText("bye2", "<p><b>Why was I excluded?</b><p>We used Prolific's prescreening options in order to recruit participants who are "
                             + "between the <b>ages of 18-31</b>, whose first/<b>native language is English</b>,<br> and who <b>grew up speaking only "
                             + "their native language</b> (which in this case should be English).<p> You must have indicated on the previous "
                             + "page that one of these is not true. If you think there has been a mistake, please let the researchers know via Prolific. <br>We have saved "
                             + "your responses and will gladly check them and pay you if there has been an error!"
-                           ) 
-                    .print() 
+                           )
+                    .print()
                     .wait()
                 )
                 
@@ -542,7 +536,7 @@ PennController( "instructions1",
                 newText("example5", "<p><i>'He has narrated many nature documentaries, according to Wikipedia.'</i>")
                 .settings.css("font-size", "15px")
                 .settings.css("font-family","courier")
-                , 
+                ,
                 getCanvas("instruccanvas")
                 .settings.add(0,0, getText("instructions_b"))
                 .settings.add(70,300, getText("example"))
@@ -579,7 +573,7 @@ PennController( "instructions1",
                 .remove(getText("example4"))
                 .settings.add(70,300, getText("example5"))
                 .print()  
-                , 
+                ,
                 newKey("instr_c", " ")
                 .wait()
                 ,
@@ -589,7 +583,7 @@ PennController( "instructions1",
                 newText("instructions_c", "<p>(3) After this sentence, you will decide whether the last sentence fits "
                         + "naturally with the previous mini-biography by pressing"
                         + " the <b>'F' key</b> for <i>'yes, it fits'</i>, or the <b>'J' key</b> for <i>'no, it doesn't'</i>." // F-version
-                        // + "the 'F' key for 'no, it doesn't', or the 'J' key for 'yes, it fits'." // J-version
+                        //+ "the 'F' key for 'no, it doesn't', or the 'J' key for 'yes, it fits'." // J-version
                         + " However, during the experiment the sentences will disappear before you can make a selection, so consider this when you reach the end of the sentences."
                         + "<p>Once you've made your decision, you will continue to the next cultural figure."
                         + "<br> You only have a few seconds to make this selection, otherwise it will time out."
@@ -607,7 +601,7 @@ PennController( "instructions1",
     .log("age", getVar("IDage"))
     .log("sex", getVar("IDsex"))
     .log("L2", getVar("IDling"))
-    .log("whichL2", getVar("whichL2")) 
+    .log("whichL2", getVar("whichL2"))
     .log("type", "instr")
     .log("lifetime" , "instr")
     .log("tense", "instr")
@@ -616,7 +610,7 @@ PennController( "instructions1",
     .log("rating", "instr")
     .log("post_fam_key", "instr")
     .log("post_alive_key", "instr")
-    .log("item" , "instr") 
+    .log("item" , "instr")
     .log("name" , "instr")  
     .log("list", "instr")
     .log( "withsquare", PennController.GetURLParameter("withsquare"))    
@@ -630,7 +624,7 @@ PennController( "instructions1",
 // Practice items
 
 
-PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv")// change this line for the appropriate experimental list
+PennController.Template( PennController.GetTable( "master_spr_subset20_past_replication.csv")// change this line for the appropriate experimental list
                          .filter("type" , "practice")
                          ,  
                          variable => ["practice",
@@ -696,12 +690,12 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       getText("crit_instru")
                                       .remove()
                                       ,
-                                      getText("bio") 
+                                      getText("bio")
                                       .remove()         
                                       ,
                                       // present judgement task instructions
                                       newText ("rating_instru", "<i>Did the last sentence fit with the preceding sentences?<p>The 'F' key = 'yes', the 'J' key = 'no'.</i>") // F-version
-                                      // newText ("rating_instru", "<i>Did the last sentence fit with the preceding sentences?<p>The 'J' key = 'yes', the 'F' key = 'no'.</i>") // J-version
+                                      //newText ("rating_instru", "<i>Did the last sentence fit with the preceding sentences?<p>The 'J' key = 'yes', the 'F' key = 'no'.</i>") // J-version
                                       .settings.center()
                                       .settings.css("font-size", "15px")
                                       .settings.css("font-family","times new roman")
@@ -729,7 +723,7 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       // clear everything
                                       getText("rating_instru")
                                       .remove()
-                                      , 
+                                      ,
                                       getImage("crossmark")
                                       .remove()
                                       ,
@@ -774,7 +768,7 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .and(getVar("match") // and if the correct answer...
                                       .test.is("yes")) // is 'yes'
                                       .or( // conversely,
-                                      getVar("rating") // check if the rating... 
+                                      getVar("rating") // check if the rating...
                                       .test.is(
                                       getVar("no_key")) // ...equals 'no'
                                       .and(getVar("match") // and if the correct answer...
@@ -829,16 +823,16 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .log("age", getVar("IDage"))
                                       .log("sex", getVar("IDsex"))
                                       .log("L2", getVar("IDling"))
-                                      .log("whichL2", getVar("whichL2")) 
+                                      .log("whichL2", getVar("whichL2"))
                                       .log("type", variable.type)
-                                      .log("lifetime" , variable.life_status)
+                                      .log("lifetime" , variable.lifetime)
                                       .log("tense", variable.tense)
                                       .log("mm", variable.mm)
                                       .log("match", variable.match)
                                       .log("rating", getVar("rating"))
                                       .log("post_fam_key", "practice")
                                       .log("post_alive_key", "practice")
-                                      .log("item" , variable.item_id) 
+                                      .log("item" , variable.item_id)
                                       .log("name" , variable.name)  
                                       .log("list", variable.list)
                                       .log( "withsquare", PennController.GetURLParameter("withsquare") )    
@@ -894,7 +888,7 @@ PennController( "instructions2" ,
     .log("age", getVar("IDage"))
     .log("sex", getVar("IDsex"))
     .log("L2", getVar("IDling"))
-    .log("whichL2", getVar("whichL2")) 
+    .log("whichL2", getVar("whichL2"))
     .log("type", "instr2")
     .log("lifetime" , "instr2")
     .log("tense", "instr2")
@@ -903,7 +897,7 @@ PennController( "instructions2" ,
     .log("rating", "instr2")
     .log("post_fam_key", "instr2")
     .log("post_alive_key", "instr2")
-    .log("item" , "instr2") 
+    .log("item" , "instr2")
     .log("name" , "instr2")  
     .log("list", "instr2")
     .log( "withsquare", PennController.GetURLParameter("withsquare"))    
@@ -916,7 +910,7 @@ PennController( "instructions2" ,
 //====================================================================================================================================================================================================================
 // Critical items
 
-PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv")
+PennController.Template( PennController.GetTable( "master_spr_subset20_past_replication.csv")
                          .filter("type" , "critical")
                          ,
                          variable => ["critical",
@@ -961,8 +955,8 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       //critical sentence
                                       ...cumulative_crit(variable.critical, "remove")    
                                       ,  
-                                      getText("bio") 
-                                      .remove() 
+                                      getText("bio")
+                                      .remove()
                                       ,
                                       // print check and cross
                                       getImage("checkmark") // F-version
@@ -999,16 +993,16 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .log("age", getVar("IDage"))
                                       .log("sex", getVar("IDsex"))
                                       .log("L2", getVar("IDling"))
-                                      .log("whichL2", getVar("whichL2")) 
+                                      .log("whichL2", getVar("whichL2"))
                                       .log("type", variable.type)
-                                      .log("lifetime" , variable.life_status)
+                                      .log("lifetime" , variable.lifetime)
                                       .log("tense", variable.tense)
                                       .log("mm", variable.mm)
                                       .log("match", variable.match)
                                       .log("rating", getVar("rating"))
                                       .log("post_fam_key", "critical")
                                       .log("post_alive_key", "critical")
-                                      .log("item" , variable.item_id) 
+                                      .log("item" , variable.item_id)
                                       .log("name" , variable.name)  
                                       .log("list", variable.list)
                                       .log( "withsquare", PennController.GetURLParameter("withsquare") )    
@@ -1022,7 +1016,7 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
 //====================================================================================================================================================================================================================
 // Filler items
 
-PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv")
+PennController.Template( PennController.GetTable( "master_spr_subset20_past_replication.csv")
                          .filter("type" , "filler")
                          ,
                          variable => ["filler",
@@ -1060,7 +1054,7 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       //critical sentence
                                       ...cumulative_crit(variable.critical, "remove")    
                                       ,  
-                                      getText("bio") 
+                                      getText("bio")
                                       .remove()   
                                       ,
                                       // print check and cross
@@ -1071,7 +1065,7 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       getImage("crossmark") // F-version
                                       //getImage("checkmark") // J-version
                                       .print("70vw","45vh")
-                                      , 
+                                      ,
                                       newKey("rating", "FJ")
                                       .callback( getTimer("time_out1").stop() )
                                       .log("all")  
@@ -1094,20 +1088,20 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       //.settings.global()
                                       .set(getKey("rating") )
                                       )
-                                      .log("prolificID", getVar("proID")) 
+                                      .log("prolificID", getVar("proID"))
                                       .log("age", getVar("IDage"))
                                       .log("sex", getVar("IDsex"))
                                       .log("L2", getVar("IDling"))
-                                      .log("whichL2", getVar("whichL2")) 
+                                      .log("whichL2", getVar("whichL2"))
                                       .log("type", variable.type)
-                                      .log("lifetime" , variable.life_status)
+                                      .log("lifetime" , variable.lifetime)
                                       .log("tense", variable.tense)
                                       .log("mm", variable.mm)
                                       .log("match", variable.match)
                                       .log("rating", getVar("rating"))
                                       .log("post_fam_key", "filler")
                                       .log("post_alive_key", "filler")
-                                      .log("item" , variable.item_id) 
+                                      .log("item" , variable.item_id)
                                       .log("name" , variable.name)  
                                       .log("list", variable.list)
                                       .log( "withsquare", PennController.GetURLParameter("withsquare") )    
@@ -1148,10 +1142,8 @@ PennController( "break" ,
                 .settings.center()
                 .print()
                 ,
-                //F-Version:
+                //continue:
                 newKey("end_break", " ")
-                //J-Version:
-                //newKey("continue_Ja", "J")
                 .wait()
                 ,  
                 getText("instructions_key2")
@@ -1165,7 +1157,7 @@ PennController( "break" ,
     .log("age", getVar("IDage"))
     .log("sex", getVar("IDsex"))
     .log("L2", getVar("IDling"))
-    .log("whichL2", getVar("whichL2")) 
+    .log("whichL2", getVar("whichL2"))
     .log("type", "break")
     .log("lifetime" , "break")
     .log("tense", "break")
@@ -1174,7 +1166,7 @@ PennController( "break" ,
     .log("rating", "break")
     .log("post_fam_key", "break")
     .log("post_alive_key", "break")
-    .log("item" , "break") 
+    .log("item" , "break")
     .log("name" , "break")  
     .log("list", "break")
     .log( "withsquare", PennController.GetURLParameter("withsquare"))    
@@ -1202,7 +1194,7 @@ PennController( "post-instructions",
     .log("age", getVar("IDage"))
     .log("sex", getVar("IDsex"))
     .log("L2", getVar("IDling"))
-    .log("whichL2", getVar("whichL2")) 
+    .log("whichL2", getVar("whichL2"))
     .log("type", "post-instr")
     .log("lifetime" , "post-instr")
     .log("tense", "post-instr")
@@ -1211,11 +1203,11 @@ PennController( "post-instructions",
     .log("rating", "post-instr")
     .log("post_fam_key", "post-instr")
     .log("post_alive_key", "post-instr")
-    .log("item" , "post-instr") 
+    .log("item" , "post-instr")
     .log("name" , "post-instr")  
     .log("list", "post-instr")
     .log( "withsquare", PennController.GetURLParameter("withsquare") )    
-    .log("bare_verb","post-instr") 
+    .log("bare_verb","post-instr")
     .log( "yes_key" , getVar("yes_key"))  
     
     
@@ -1326,7 +1318,7 @@ PennController("post-ques",
     .log("age", getVar("IDage"))
     .log("sex", getVar("IDsex"))
     .log("L2", getVar("IDling"))
-    .log("whichL2", getVar("whichL2")) 
+    .log("whichL2", getVar("whichL2"))
     .log("type", "post-ques")
     .log("lifetime" , "post-ques")
     .log("tense", "post-ques")
@@ -1335,7 +1327,7 @@ PennController("post-ques",
     .log("rating", "post-ques")
     .log("post_fam_key", "post-ques")
     .log("post_alive_key", "post-ques")
-    .log("item" , "post-ques") 
+    .log("item" , "post-ques")
     .log("name" , "post-ques")  
     .log("list", "post-ques")
     .log( "withsquare", PennController.GetURLParameter("withsquare"))    
@@ -1380,7 +1372,7 @@ PennController( "post-task-intro",
 //====================================================================================================================================================================================================================
 // Post-practice
 
-PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv")
+PennController.Template( PennController.GetTable( "master_spr_subset20_past_replication.csv")
                          .filter("type" , "practice")
                          ,
                          variable => ["post-practice",
@@ -1410,7 +1402,7 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                           //.print()
                                           .settings.css("font-size", "30px")
                                           .settings.css("font-family","courier")
-                                          .print("center at 50%","middle at 40%") 
+                                          .print("center at 50%","middle at 40%")
                                           ,
                                           newText("familiar", "familiar?")
                                           .settings.css("font-size", "20px")
@@ -1545,7 +1537,7 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .log("L2", getVar("IDling"))
                                       .log("whichL2", getVar("whichL2"))
                                       .log("type", variable.type)
-                                      .log("lifetime" , variable.life_status)
+                                      .log("lifetime" , variable.lifetime)
                                       .log("tense", variable.tense)
                                       .log("mm", variable.mm)
                                       .log("match", variable.match)
@@ -1586,7 +1578,7 @@ PennController( "post-task-start",
 //====================================================================================================================================================================================================================
 // Post-task
 
-PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv")
+PennController.Template( PennController.GetTable( "master_spr_subset20_past_replication.csv")
                          .filter("type" , "critical")
                          ,
                          variable => ["post-task",
@@ -1692,7 +1684,7 @@ PennController.Template( PennController.GetTable( "master_spr_subset20_past.csv"
                                       .log("L2", getVar("IDling"))
                                       .log("whichL2", getVar("whichL2"))
                                       .log("type", variable.type)
-                                      .log("lifetime" , variable.life_status)
+                                      .log("lifetime" , variable.lifetime)
                                       .log("tense", variable.tense)
                                       .log("mm", variable.mm)
                                       .log("match", variable.match)
